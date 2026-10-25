@@ -26,3 +26,11 @@ Use this shape for new entries:
 - Wiki pages changed: `wiki/AGENTS.md`, `wiki/index.md`, `wiki/log.md`, `wiki/state.md`, `wiki/raw/README.md`.
 - Verification: required files and managed regions exist; existing files were preserved or merged; protocol validation result was recorded.
 - Notes: installed payload may also create or merge root and spec files; initial codebase ingest is still needed. `uv run spec/scripts/manage-spec-item.py --root . validate --operational` passed (`valid: true`, count 0, no warnings). `validate --all` also passed (`valid: true`, count 0, no warnings).
+
+## [2026-10-25] dream | pi-ez-session-name module page
+
+- Trigger: Dream run for `Gamemaster checkpoint: 261025-1918-auto-name-sessions-after-first-prompt-with-a-configurable-cheap-model/direct`.
+- Inputs: `src/index.ts`, `tests/index.test.ts`, `package.json`, `spec/archive/261025-1918-auto-name-sessions-after-first-prompt-with-a-configurable-cheap-model/` (plan, verification, outcome), Pi 1.4.0 runtime source, current session.
+- Wiki pages changed: `wiki/modules/pi-ez-session-name.md` (new), `wiki/dreams/MEMORY.md` (new pointer), `wiki/index.md` (module route and generic Dream routes), `wiki/state.md`.
+- Verification: re-read changed files, checked relative links, ran memory safety scan and MEMORY token budget, `git diff --check`.
+- Notes: provider coverage beyond Anthropic and in-flight session replacement remain fake-tested only.

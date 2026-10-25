@@ -18,6 +18,7 @@ Repository-local planning and execution artifacts.
 <!-- spec-items:archive:start -->
 | Item | Kind | Status | Updated |
 | --- | --- | --- | --- |
+| [Auto-name sessions after first prompt with a configurable cheap model](./archive/261025-1918-auto-name-sessions-after-first-prompt-with-a-configurable-cheap-model/plan.md) | work-item | completed | 2026-10-25 |
 <!-- spec-items:archive:end -->
 
 ## Templates

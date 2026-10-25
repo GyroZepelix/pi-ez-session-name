@@ -15,11 +15,17 @@ TBD after initial codebase ingest.
 
 ## Modules
 
-TBD after initial codebase ingest.
+- [pi-ez-session-name extension](./modules/pi-ez-session-name.md): Auto-naming trigger, `/ez-name`, config, Pi host constraints, and checks for `src/index.ts`.
 
 ## Workflows
 
 TBD after initial codebase ingest.
+
+## Dream memory
+
+- [Episode catalog](./dreams/episodes.jsonl): Metadata for immutable Dream session logs in `wiki/dreams/`.
+- Per-spec checkpoint ledgers: `wiki/dreams/by-spec/<item-id>.md` (historical, append-only).
+- Workflow retrospectives: `wiki/dreams/retrospectives/<item-id>.md` (historical, append-only).
 
 ## Stale or needs review
 
