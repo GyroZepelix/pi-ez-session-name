@@ -23,7 +23,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test tests/*.test.ts"
+    "test": "node --import tsx --test tests/*.test.ts",
+    "eval:naming": "node --import tsx scripts/eval-naming.ts"
   },
   "peerDependencies": {
     "@earendil-works/pi-coding-agent": "*"

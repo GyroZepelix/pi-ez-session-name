@@ -10,6 +10,7 @@ Last lint date: none
 | --- | --- | --- | --- | --- | --- |
 | `https://git.dgjalic.com/dgjalic/repo-wiki-template` | Protocol 2.2.1/schema-2 template installer | Forgejo repository | 2026-10-25 | `AGENTS.md`, `spec/`, `wiki/` | Installed lean repo wiki template. |
 | `spec/archive/261025-1918-auto-name-sessions-after-first-prompt-with-a-configurable-cheap-model/` | Archived spec (plan, verification, outcome) and `src/index.ts` | Repository | 2026-10-25 | `modules/pi-ez-session-name.md` | Initial module page from Dream checkpoint; source not yet committed. |
+| `spec/archive/261026-1435-improve-session-naming-prompt-auto-context-and-title-length/` | Archived spec (plan, verification, outcome), `src/index.ts`, `scripts/eval-naming.ts` | Repository | 2026-10-26 | `modules/pi-ez-session-name.md`, `observations.md` | Module page updated in the item's T05; Dream added one observation. Source not yet committed. |
 
 ## Maintenance policy
 

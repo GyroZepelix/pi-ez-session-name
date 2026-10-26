@@ -19,6 +19,7 @@ Repository-local planning and execution artifacts.
 | Item | Kind | Status | Updated |
 | --- | --- | --- | --- |
 | [Auto-name sessions after first prompt with a configurable cheap model](./archive/261025-1918-auto-name-sessions-after-first-prompt-with-a-configurable-cheap-model/plan.md) | work-item | completed | 2026-10-25 |
+| [Improve session naming prompt, auto context, and title length](./archive/261026-1435-improve-session-naming-prompt-auto-context-and-title-length/plan.md) | work-item | completed | 2026-10-26 |
 <!-- spec-items:archive:end -->
 
 ## Templates

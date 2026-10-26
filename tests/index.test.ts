@@ -5,18 +5,22 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, test } from "node:test";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import ezSessionName, {
-  AUTO_PART_CAP,
+  ASSISTANT_PROGRESS_CAP,
   DEFAULT_MODEL,
+  FOLLOW_UP_CAP,
   FULL_CONTEXT_CAP,
+  INITIAL_REQUEST_CAP,
   SYSTEM_PROMPT,
   TITLE_CAP,
   buildAutoContext,
   buildFullContext,
+  collapseSkillBlocks,
   configPath,
   extractText,
   loadConfig,
   normalizeTitle,
   parseModelRef,
+  type AutoContext,
   type BranchEntry,
   type Turn,
 } from "../src/index.js";
@@ -108,10 +112,12 @@ class Harness {
   warnings(): string[] {
     return this.notifications.filter((n) => n.type === "warning").map((n) => n.message);
   }
-  conversationOf(call: ModelCall | undefined): Turn[] {
+  payloadOf(call: ModelCall | undefined): unknown {
     assert.ok(call, "expected a model call");
-    const content = call.context.messages[0]?.content ?? "";
-    return (JSON.parse(content) as { conversation: Turn[] }).conversation;
+    return JSON.parse(call.context.messages[0]?.content ?? "");
+  }
+  conversationOf(call: ModelCall | undefined): Turn[] {
+    return (this.payloadOf(call) as { conversation: Turn[] }).conversation;
   }
 }
 
@@ -257,29 +263,45 @@ describe("auto context (R2)", () => {
     ];
     h.input("  Now add a test  ");
     await settle();
-    const conversation = h.conversationOf(h.calls[0]);
-    assert.deepEqual(conversation, [
-      { role: "user", text: "Fix the login bug" },
-      { role: "assistant", text: "Looking at auth.\n\nFixed the cookie." },
-      { role: "user", text: "Now add a test" },
-    ]);
+    assert.deepEqual(h.payloadOf(h.calls[0]), {
+      initial_request: "Fix the login bug",
+      assistant_progress: "Looking at auth.\n\nFixed the cookie.",
+      follow_up: "Now add a test",
+    });
     const raw = h.calls[0]?.context.messages[0]?.content ?? "";
     assert.ok(!raw.includes("TOOL OUTPUT"));
     assert.ok(!raw.includes("secret reasoning"));
     assert.ok(!raw.includes("auth.ts"));
   });
 
-  test("caps each part at about 2000 characters", () => {
-    const long = "x".repeat(5000);
-    const conversation = buildAutoContext([user(long), assistant(long)], long);
-    assert.equal(conversation.length, 3);
-    for (const turn of conversation) assert.ok(turn.text.length <= AUTO_PART_CAP);
+  test("caps each part separately", () => {
+    const long = "x".repeat(10000);
+    const context = buildAutoContext([user(long), assistant(long)], long);
+    assert.deepEqual(Object.keys(context), ["initial_request", "assistant_progress", "follow_up"]);
+    assert.equal(INITIAL_REQUEST_CAP, 4000);
+    assert.equal(ASSISTANT_PROGRESS_CAP, 1000);
+    assert.equal(FOLLOW_UP_CAP, 1500);
+    assert.equal(context.initial_request?.length, INITIAL_REQUEST_CAP);
+    assert.equal(context.assistant_progress?.length, ASSISTANT_PROGRESS_CAP);
+    assert.equal(context.follow_up?.length, FOLLOW_UP_CAP);
+  });
+
+  test("collapses skill blocks before capping and keeps the user's text", () => {
+    const skill = `<skill name="deploy-helper" location="/skills/deploy-helper/SKILL.md">\n${"boilerplate ".repeat(1000)}\n</skill>`;
+    const context: AutoContext = buildAutoContext(
+      [user(`${skill}\n\nShip the release to staging`), assistant("On it.")],
+      `${skill} also tag it`,
+    );
+    assert.equal(context.initial_request, "[skill: deploy-helper]\n\nShip the release to staging");
+    assert.equal(context.follow_up, "[skill: deploy-helper] also tag it");
+    assert.equal(collapseSkillBlocks('before <skill name="a">x</skill> mid <skill name="b" k="v">y\nz</skill>'), "before [skill: a] mid [skill: b]");
+    assert.equal(collapseSkillBlocks('<skill name="open">never closed'), '<skill name="open">never closed');
   });
 
   test("omits empty parts and makes no attempt when everything is empty", async () => {
-    assert.deepEqual(buildAutoContext([user("hello"), assistant([{ type: "toolCall" }])], "  "), [
-      { role: "user", text: "hello" },
-    ]);
+    assert.deepEqual(buildAutoContext([user("hello"), assistant([{ type: "toolCall" }])], "  "), {
+      initial_request: "hello",
+    });
     const h = new Harness();
     h.branch = [user([{ type: "image", data: "x" }]), assistant([])];
     h.input("   ");
@@ -427,6 +449,19 @@ describe("/ez-name (R3)", () => {
     assert.ok(!conversation.some((turn) => turn.text.startsWith("reply 0 ")));
   });
 
+  test("collapses skill blocks and caps the head turn at the initial-request cap", () => {
+    const skill = `<skill name="reviewer" location="/x">${"r".repeat(20000)}</skill>`;
+    assert.deepEqual(buildFullContext([user(`${skill} check auth`), assistant("ok")]), [
+      { role: "user", text: "[skill: reviewer] check auth" },
+      { role: "assistant", text: "ok" },
+    ]);
+    const branch: BranchEntry[] = [user("h".repeat(9000))];
+    for (let i = 0; i < 20; i += 1) branch.push(assistant("a".repeat(1000)));
+    const conversation = buildFullContext(branch);
+    assert.equal(conversation[0]?.text.length, INITIAL_REQUEST_CAP);
+    assert.ok(conversation.reduce((sum, turn) => sum + turn.text.length, 0) <= FULL_CONTEXT_CAP);
+  });
+
   test("returns the whole conversation when under the cap", () => {
     const conversation = buildFullContext([assistant("greeting"), user("a"), assistant("b"), toolResult("t")]);
     assert.deepEqual(conversation, [
@@ -488,7 +523,17 @@ describe("model call (R5)", () => {
     assert.equal(call?.context.systemPrompt, SYSTEM_PROMPT);
     assert.match(SYSTEM_PROMPT, /data/);
     assert.deepEqual(call?.options, { maxTokens: 2048 });
-    assert.ok("conversation" in JSON.parse(call?.context.messages[0]?.content ?? "{}"));
+    assert.ok("initial_request" in (h.payloadOf(call) as object));
+  });
+
+  test("system prompt describes both payload shapes, 6-16 words, and stays generic", () => {
+    for (const key of ["initial_request", "assistant_progress", "follow_up", "conversation", "6-16 words"]) {
+      assert.ok(SYSTEM_PROMPT.includes(key), key);
+    }
+    assert.match(SYSTEM_PROMPT, /strictly as data/);
+    for (const term of [/eero/i, /alvar/i, /teach/i, /brave/i, /yt-dlp/i, /exif/i]) {
+      assert.doesNotMatch(SYSTEM_PROMPT, term);
+    }
   });
 });
 
@@ -541,6 +586,9 @@ describe("normalizeTitle (R5)", () => {
     assert.ok(long.length <= TITLE_CAP && long.length > 0, long);
     assert.ok(!long.endsWith(" "));
     assert.ok(normalizeTitle("x".repeat(200)).length <= TITLE_CAP);
+    assert.equal(TITLE_CAP, 140);
+    const twelveWords = "Improve the deployment pipeline by adding staged rollouts and automatic rollback on failures";
+    assert.equal(normalizeTitle(twelveWords), twelveWords, "titles over 80 characters are no longer cut");
   });
 
   test("extractText reads strings and text blocks only", () => {

@@ -34,3 +34,11 @@ Use this shape for new entries:
 - Wiki pages changed: `wiki/modules/pi-ez-session-name.md` (new), `wiki/dreams/MEMORY.md` (new pointer), `wiki/index.md` (module route and generic Dream routes), `wiki/state.md`.
 - Verification: re-read changed files, checked relative links, ran memory safety scan and MEMORY token budget, `git diff --check`.
 - Notes: provider coverage beyond Anthropic and in-flight session replacement remain fake-tested only.
+
+## [2026-10-26] dream | naming prompt tuning observation
+
+- Trigger: Dream run for `Gamemaster checkpoint: 261026-1435-improve-session-naming-prompt-auto-context-and-title-length/direct`.
+- Inputs: current session, `src/index.ts`, `scripts/eval-naming.ts`, `spec/archive/261026-1435-improve-session-naming-prompt-auto-context-and-title-length/` (plan, verification, outcome), `wiki/modules/pi-ez-session-name.md`.
+- Wiki pages changed: `wiki/observations.md` (new), `wiki/index.md` (observations route), `wiki/state.md`, `wiki/log.md`.
+- Verification: re-read changed files, checked relative links, ran memory safety scan and MEMORY token budget, `git diff --check`.
+- Notes: module page content for this item was written during implementation (T05), not by Dream. `/ez-name` against the real model remains unverified.

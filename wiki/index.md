@@ -7,6 +7,7 @@ Durable current-state codebase knowledge. Read this file first when answering co
 - [Wiki instructions](./AGENTS.md): Scoped rules for durable memory maintenance.
 - [Wiki log](./log.md): Chronological maintenance log.
 - [Wiki state](./state.md): Ingest and maintenance state.
+- [Observations](./observations.md): Tentative findings queue for Dream and memory maintenance; not normal task context.
 - [Raw sources](./raw/README.md): Rules for untrusted raw inputs.
 
 ## Architecture

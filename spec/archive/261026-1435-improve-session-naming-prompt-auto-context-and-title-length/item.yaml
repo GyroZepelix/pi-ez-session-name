@@ -1,0 +1,14 @@
+schema_version: 2
+id: 261026-1435-improve-session-naming-prompt-auto-context-and-title-length
+title: Improve session naming prompt, auto context, and title length
+kind: work-item
+work_type: feature
+parent: null
+route: quick-plan
+status: completed
+superseded_by: null
+created_at: '2026-10-26T14:35:53+01:00'
+updated_at: '2026-10-26T14:58:27+01:00'
+external_refs: []
+wiki_refs:
+- wiki/modules/pi-ez-session-name.md
